@@ -1,424 +1,879 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>迷你都市 - 城市建造经营游戏</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
-            user-select: none;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>重生高中之我要上浙江大学</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei", "Segoe UI", "PingFang SC", Roboto, sans-serif;
+}
+body {
+    background: linear-gradient(145deg, #eef2ff 0%, #d9e4f5 100%);
+    padding: 20px;
+    min-height: 100vh;
+}
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+.header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2b4c8a 100%);
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.header h1 { font-size: 22px; display: flex; align-items: center; gap: 8px; }
+.header-right { display: flex; gap: 10px; flex-wrap: wrap; }
+.stage-info, .roguelike-tag, .double-buff-tag, .class-tip, .contest-tag, .art-tag, .sport-tag {
+    padding: 4px 12px; border-radius: 40px; font-size: 12px; font-weight: bold;
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);
+}
+.double-buff-tag { background: #2ecc71; display: none; }
+.class-tip { background: #f39c12; display: none; }
+.contest-tag { background: #9b59b6; display: none; }
+.art-tag { background: #e84393; display: none; }
+.sport-tag { background: #f97316; display: none; }
 
-        body {
-            background-color: #121214;
-            color: #fff;
-            overflow: hidden;
-        }
+.main-wrap { display: flex; flex-wrap: wrap; }
+.left-area { flex: 3; min-width: 280px; padding: 20px; background: white; }
+.right-area { flex: 1.2; min-width: 260px; background: #f8fafc; padding: 20px; display: flex; flex-direction: column; gap: 20px; border-left: 1px solid #e2e8f0; }
 
-        .top-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 25px;
-            background: #1f1f23;
-            border-bottom: 2px solid #333;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-        }
+.char-card {
+    background: linear-gradient(145deg, #fff, #f1f5f9);
+    border-radius: 28px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+}
+.char-icon { font-size: 72px; transition: 0.2s; cursor: pointer; }
+.char-desc { font-size: 14px; font-weight: 500; background: #eef2ff; display: inline-block; padding: 4px 16px; border-radius: 40px; margin-top: 8px; }
+.speech-bubble { background: white; border-radius: 20px; padding: 10px; margin-top: 14px; font-size: 12px; color: #334155; box-shadow: 0 2px 8px rgba(0,0,0,0.05); min-height: 65px; display: flex; align-items: center; justify-content: center; }
 
-        .status-group {
-            display: flex;
-            gap: 25px;
-        }
+.status-wrap {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.status-item {
+    background: #f8fafc;
+    border-radius: 18px;
+    padding: 8px;
+    text-align: center;
+}
+.status-name { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+.progress-bar { height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+.progress-inner { height: 100%; border-radius: 10px; transition: width 0.2s; }
 
-        .status-item {
-            padding: 6px 14px;
-            background: #2d2d34;
-            border-radius: 8px;
-            font-size: 15px;
-            min-width: 100px;
-            text-align: center;
-        }
+.score-wrap {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.score-item {
+    background: #f0f9ff;
+    padding: 6px 4px;
+    border-radius: 14px;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+}
+.score-item.remove-sub { display: none; }
+.score-title { font-size: 10px; color: #334155; }
+.score-num { font-size: 18px; font-weight: 800; color: #1e3c72; }
 
-        .happy { color: #4ade80; }
-        .danger { color: #f87171; }
+.timetable-title { font-size: 16px; font-weight: bold; margin: 12px 0 8px; color: #1e293b; }
+.plan-source {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.plan-item {
+    width: 85px;
+    background: white;
+    border-radius: 16px;
+    padding: 6px 4px;
+    text-align: center;
+    cursor: grab;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid #cbd5e1;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.plan-item.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    filter: grayscale(0.3);
+}
+.plan-item.locked small { color: #94a3b8; }
+.plan-item small { display: block; font-size: 9px; color: #64748b; margin-top: 3px; line-height: 1.2; }
+.plan-item:active { cursor: grabbing; }
 
-        .func-group button {
-            padding: 7px 16px;
-            margin-left: 8px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-        }
+.plan-table {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 24px;
+    margin-bottom: 16px;
+}
+.plan-slot {
+    background: white;
+    border-radius: 16px;
+    min-height: 75px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #94a3b8;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.1s;
+    padding: 6px;
+}
+.plan-slot.filled {
+    border: 2px solid #3b82f6;
+    background: #eff6ff;
+}
+.slot-effect { font-size: 9px; color: #059669; margin-top: 3px; text-align: center; }
 
-        .save-btn { background: #3b82f6; color: #fff; }
-        .load-btn { background: #8b5cf6; color: #fff; }
-        .reset-btn { background: #ef4444; color: #fff; }
+.action-group { margin-top: 12px; }
+.action-btn-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 8px 0;
+}
+.action-btn {
+    background: #eef2ff;
+    border: none;
+    padding: 8px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.1s;
+}
+.action-btn.locked {
+    background: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.action-btn.locked:hover { background: #cbd5e1; color: #64748b; transform: none; }
+.action-btn:hover:not(:disabled):not(.locked) { background: #3b82f6; color: white; }
+.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-desc { font-size: 10px; color: #64748b; line-height: 1.3; }
 
-        .func-group button:hover { opacity: 0.85; }
-
-        .game-wrap {
-            display: flex;
-            height: calc(100vh - 64px);
-        }
-
-        .build-panel {
-            width: 240px;
-            background: #1a1a1f;
-            padding: 20px 15px;
-            border-right: 2px solid #333;
-        }
-
-        .panel-title {
-            font-size: 20px;
-            color: #60a5fa;
-            margin-bottom: 18px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .build-btn {
-            width: 100%;
-            padding: 11px;
-            margin: 7px 0;
-            border: none;
-            border-radius: 7px;
-            background: #27272a;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s ease;
-            border: 1px solid #444;
-        }
-
-        .build-btn:hover {
-            background: #38383f;
-            border-color: #60a5fa;
-        }
-
-        .build-btn.active {
-            background: #2563eb;
-            border-color: #93c5fd;
-        }
-
-        .tip-box {
-            margin-top: 25px;
-            padding: 12px;
-            background: #27272a;
-            border-radius: 7px;
-            font-size: 12px;
-            color: #aaa;
-            line-height: 1.6;
-        }
-
-        .city-map {
-            flex: 1;
-            padding: 10px;
-            display: grid;
-            grid-template-columns: repeat(45, 26px);
-            grid-template-rows: repeat(28, 26px);
-            gap: 2px;
-            background: #0f0f12;
-            overflow: auto;
-        }
-
-        .tile {
-            width: 26px;
-            height: 26px;
-            background: #3f6212;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: transform 0.15s ease;
-        }
-
-        .tile:hover { transform: scale(1.08); }
-        .tile.road { background: #52525b; }
-        .tile.house { background: #eab308; }
-        .tile.factory { background: #dc2626; }
-        .tile.park { background: #16a34a; }
-        .tile.power { background: #7c3aed; }
-        .tile.water { background: #0284c7; }
-        .tile.disaster { animation: shake 0.4s infinite; background: #b91c1c; }
-
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
-
-        .msg-popup {
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 22px;
-            background: rgba(0,0,0,0.85);
-            border-radius: 20px;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            z-index: 999;
-        }
-    </style>
+.end-day-btn {
+    background: linear-gradient(95deg, #10b981, #059669);
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 40px;
+    font-weight: bold;
+    color: white;
+    margin: 16px 0;
+    cursor: pointer;
+    font-size: 14px;
+}
+.event-panel { background: #fefce8; border-radius: 20px; padding: 14px; margin-top: 12px; border: 1px solid #fde047; }
+.log-area { max-height: 120px; overflow-y: auto; font-size: 11px; background: #f1f5f9; padding: 10px; border-radius: 16px; margin-top: 12px; }
+.modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; z-index:1000; }
+.modal-box { background: white; border-radius: 32px; max-width: 90%; width: 500px; padding: 24px; text-align: center; }
+.route-modal .modal-box {
+    background: linear-gradient(145deg, #fff8e7, #fff0d0);
+    border: 3px solid #f59e0b;
+    box-shadow: 0 0 20px rgba(245,158,11,0.5);
+}
+.route-btn {
+    background: linear-gradient(95deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px 28px;
+    border-radius: 60px;
+    border: none;
+    margin: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.route-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(95deg, #fbbf24, #f59e0b);
+}
+.route-btn-cancel { background: #6b7280; }
+.route-btn-cancel:hover { background: #4b5563; }
+.sub-choice-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 16px 0; }
+.sub-check { padding: 8px; border: 1px solid #ccc; border-radius: 12px; cursor: pointer; font-size: 13px; text-align: center; }
+.sub-check.active { background: #2d4fc9; color: white; border-color: #2d4fc9; }
+.restart-btn { margin: 8px; padding: 8px 20px; background: #2d4fc9; color: white; border: none; border-radius: 40px; cursor: pointer; }
+.choice-btn { margin: 5px; padding: 6px 14px; background: white; border: 1px solid #2d4fc9; border-radius: 30px; cursor: pointer; font-size: 12px; }
+.choice-btn:hover { background: #2d4fc9; color: white; }
+.friend-value { background: #fef3c7; padding: 8px; border-radius: 16px; text-align: center; font-size: 13px; font-weight: bold; }
+.subject-bonus { background: #dcfce7; padding: 8px; border-radius: 16px; text-align: center; font-size: 12px; margin-top: 8px; }
+.status-effect { background: #fee2e2; padding: 6px; border-radius: 12px; font-size: 11px; text-align: center; margin-top: 6px; color: #b91c1c; }
+</style>
 </head>
 <body>
-    <div class="top-bar">
-        <div class="status-group">
-            <div class="status-item">💰 资金：<span id="money">1500</span></div>
-            <div class="status-item">👥 人口：<span id="pop">0</span></div>
-            <div class="status-item">⚡ 电力：<span id="power">0</span></div>
-            <div class="status-item">💧 水源：<span id="water">0</span></div>
-            <div class="status-item" id="happyBar">😊 满意度：<span id="happy">80</span>%</div>
-            <div class="status-item">💵 每轮税收：<span id="tax">0</span></div>
-        </div>
-        <div class="func-group">
-            <button class="save-btn" onclick="saveGame()">💾 存档</button>
-            <button class="load-btn" onclick="loadGame()">📂 读档</button>
-            <button class="reset-btn" onclick="resetGame()">🔄 重置城市</button>
-        </div>
-    </div>
+<div class="container">
+<div class="header">
+<h1>🎓 重生高中 · 决战浙大</h1>
+<div class="header-right">
+<span class="stage-info" id="stageText">高一 · 第1/20天</span>
+<span class="roguelike-tag" id="talentShow">天赋加载</span>
+<span class="double-buff-tag" id="buffTag">✨双倍收益</span>
+<span class="class-tip" id="classBuffTag">📚培训班加成</span>
+<span class="contest-tag" id="contestTag">🏆竞赛路线</span>
+<span class="art-tag" id="artTag">🎨艺术路线</span>
+<span class="sport-tag" id="sportTag">🏅体育路线</span>
+</div>
+</div>
+<div class="main-wrap">
+<div class="left-area">
+<div class="status-wrap">
+<div class="status-item"><div class="status-name">⚡精力</div><div class="progress-bar"><div class="progress-inner energy" id="energyBar"></div></div><span id="energy">60</span>/<span id="maxEnergy">60</span></div>
+<div class="status-item"><div class="status-name">😣压力</div><div class="progress-bar"><div class="progress-inner pressure" id="pressureBar"></div></div><span id="pressure">0</span>/100</div>
+<div class="status-item"><div class="status-name">🏃体魄</div><div class="progress-bar"><div class="progress-inner physical" id="physicalBar"></div></div><span id="physical">0</span>/100</div>
+<div class="status-item"><div class="status-name">🤝情商</div><div class="progress-bar"><div class="progress-inner emotion" id="emotionBar"></div></div><span id="emotion">0</span>/100</div>
+</div>
+<div class="score-wrap" id="scoreGrid"></div>
 
-    <div class="game-wrap">
-        <div class="build-panel">
-            <div class="panel-title">🏗️ 建造菜单</div>
-            <button class="build-btn" data-type="road" data-cost="40">🛣️ 道路 (40金币)</button>
-            <button class="build-btn" data-type="house" data-cost="180">🏠 居民区 (180金币)</button>
-            <button class="build-btn" data-type="factory" data-cost="320">🏭 工业区 (320金币)</button>
-            <button class="build-btn" data-type="park" data-cost="120">🌳 公园 (120金币)</button>
-            <button class="build-btn" data-type="power" data-cost="450">⚡ 发电厂 (450金币)</button>
-            <button class="build-btn" data-type="water" data-cost="380">💧 自来水厂 (380金币)</button>
+<div class="timetable-title">📋 今日课表 (拖拽到格子，结束日统一结算)</div>
+<div class="plan-source" id="dragTable"></div>
+<div class="plan-table" id="planTable"></div>
 
-            <div class="tip-box">
-                游戏规则：<br>
-                1. 道路必须连通建筑才能生效<br>
-                2. 电厂/水厂保障全城基础运转<br>
-                3. 公园提升市民满意度<br>
-                4. 每10秒自动结算税收<br>
-                5. 每30分钟有概率触发灾害
-            </div>
-        </div>
+<div class="action-group"><div class="group-title">⚡ 快捷行动 (立即生效)</div><div class="action-btn-group" id="actionBtns"></div><div class="btn-desc">刷题：-10精，语数英+0~1，选考随机+0~1，累计40次解锁全部特训。<br>高一年级加成较低，高二中等，高三最高。社交越多，艺术/体育事件概率越高。</div></div>
+<button class="end-day-btn" id="endDayBtn">⏭️ 结束本日 & 结算课程表</button>
+<div class="event-panel"><div class="event-text" id="eventText">🎒 新学期，从零开始！刷题40次解锁全特训，分数随年级递增。</div><div id="choiceBox" style="margin-top:8px;"></div><div class="log-area" id="logBox">【系统】游戏已启动，刷题语数英+0~1，选考随机小幅度增长。</div></div>
+</div>
+<div class="right-area">
+<div class="char-card"><div class="char-icon" id="charEmoji">🧑‍🎓</div><div class="char-desc" id="gradeDesc">高一 · 追梦人</div><div class="speech-bubble" id="speechBubble">✨ 从零开始，我要上浙大！</div></div>
+<div class="talent-box"><div class="talent-title">🏅 天赋系统</div><div id="talentList"></div></div>
+<div class="friend-value">💞 友情羁绊: <span id="friend">0</span> / 100</div>
+<div class="friend-value">🎨 艺术值: <span id="artValue">0</span> / 100</div>
+<div class="friend-value" style="background:#e0e7ff;">🔓 已解锁特训: <span id="unlockedTrainings">无</span></div>
+<div class="subject-bonus" id="subjectBonusDisplay">📊 选科后显示科目加成</div>
+<div id="activeStatusDisplay" class="status-effect" style="display:none;"></div>
+</div>
+</div>
+</div>
 
-        <div class="city-map" id="map"></div>
-    </div>
+<!-- 醒目路线弹窗 -->
+<div class="modal route-modal" id="contestModal"><div class="modal-box"><h2>🏆 竞赛路线开启</h2><p>是否选择<strong>竞赛升学路线</strong>？(高考竞赛科目≥88可录取)</p><button class="route-btn" onclick="chooseContestLine(true)">✅ 踏上竞赛之路</button><button class="route-btn route-btn-cancel" onclick="chooseContestLine(false)">❌ 继续常规</button></div></div>
+<div class="modal route-modal" id="artModal"><div class="modal-box"><h2>🎨 艺术路线开启</h2><p>是否选择<strong>艺术升学路线</strong>？(艺术值+文化均分≥82可录取浙大)</p><button class="route-btn" onclick="chooseArtLine(true)">🎭 成为艺术生</button><button class="route-btn route-btn-cancel" onclick="chooseArtLine(false)">📚 暂不选择</button></div></div>
+<div class="modal route-modal" id="sportModal"><div class="modal-box"><h2>🏅 体育路线开启</h2><p>是否选择<strong>体育升学路线</strong>？(体魄≥90且主修均分≥80可录取浙大)</p><button class="route-btn" onclick="chooseSportLine(true)">🏃 成为体育生</button><button class="route-btn route-btn-cancel" onclick="chooseSportLine(false)">📖 暂不选择</button></div></div>
 
-    <div class="msg-popup" id="msg"></div>
+<div class="modal" id="selectSubModal"><div class="modal-box"><h2>📌 高一选科 (语数英必选 + 任选3门)</h2><p>选科后主修科目获得10%学习加成！并且开放【主修专攻】课程。未选科目特训将移除。</p>
+<div class="sub-choice-grid" id="subGrid"></div><p id="selectHint">已选 3/6 (语数英固定)</p>
+<button class="restart-btn" onclick="confirmSelectSub()">锁定方向</button></div></div>
+<div class="modal" id="endModal"><div class="modal-box"><h2>📜 高考落幕</h2><p id="endContent"></p><button class="restart-btn" onclick="location.reload()">重开新档</button></div></div>
+<div class="modal" id="artEventModal"><div class="modal-box"><h2>🎭 校园艺术节</h2><p id="artEventText">校园艺术节开幕，是否参加？<br>参加：-4精力，+2艺术值，+1情商</p><button class="restart-btn" onclick="respondArtEvent(true)">参加</button><button class="restart-btn btn-cancel" onclick="respondArtEvent(false)">专心学习</button></div></div>
+<div class="modal" id="sportEventModal"><div class="modal-box"><h2>🏃 校园运动会</h2><p id="sportEventText">校园运动会开幕，是否参加？<br>参加：-6精力，+3体魄，+1友情</p><button class="restart-btn" onclick="respondSportEvent(true)">参加</button><button class="restart-btn btn-cancel" onclick="respondSportEvent(false)">专心学习</button></div></div>
 
-    <script>
-        const gameData = {
-            money: 1500,
-            population: 0,
-            power: 0,
-            water: 0,
-            happy: 80,
-            tax: 0,
-            currentBuild: null,
-            mapData: []
+<script>
+// 情绪语录
+const moodQuotes = {
+    highEnergy: ["⚡ 精力充沛！我能刷一整天题！","📚 今天也要元气满满！浙大我来了！","💪 学习使我快乐！"],
+    midEnergy: ["😐 有点累了，但还能坚持...","📖 再学一会儿吧，梦想在前方。","✨ 稳住，我们能赢！"],
+    lowEnergy: ["😫 学不动了...好想休息...","🛌 眼睛快睁不开了...","💤 累成狗，但还不想放弃。"],
+    highPressure: ["😖 压力好大，喘不过气...","🤯 脑袋要炸了，去放松下吧","😭 我怕考不上浙大..."],
+    randomGood: ["🎉 终于可以放松一下了！","🏀 走，打篮球去！","🍜 食堂阿姨多给了块肉，开心！","⭐ 做对一道压轴题，爽！"],
+    randomBad: ["😔 考试又粗心了...","📉 成绩退步，好沮丧。","🕒 时间不够用，焦虑。"]
+};
+let lastSpeechTimer = null;
+function updateRandomSpeech() {
+    if(gameData.gameOver) return;
+    let msg = "";
+    if(gameData.energy < 20) msg = moodQuotes.lowEnergy[Math.floor(Math.random()*moodQuotes.lowEnergy.length)];
+    else if(gameData.energy < 40) msg = moodQuotes.midEnergy[Math.floor(Math.random()*moodQuotes.midEnergy.length)];
+    else msg = moodQuotes.highEnergy[Math.floor(Math.random()*moodQuotes.highEnergy.length)];
+    if(gameData.pressure > 70) msg = moodQuotes.highPressure[Math.floor(Math.random()*moodQuotes.highPressure.length)];
+    if(Math.random()<0.3) msg = moodQuotes.randomGood[Math.floor(Math.random()*moodQuotes.randomGood.length)];
+    if(Math.random()<0.15 && gameData.pressure>50) msg = moodQuotes.randomBad[Math.floor(Math.random()*moodQuotes.randomBad.length)];
+    document.getElementById("speechBubble").innerHTML = `💬 "${msg}"`;
+    let emoji = gameData.energy>45 ? "🧑‍🎓⚡" : (gameData.energy>20 ? "🧑‍🎓😐" : "🧑‍🎓😫");
+    if(gameData.pressure>75) emoji = "😫💢";
+    document.getElementById("charEmoji").innerText = emoji;
+}
+function refreshCharMood() { updateRandomSpeech(); if(lastSpeechTimer) clearInterval(lastSpeechTimer); lastSpeechTimer = setInterval(updateRandomSpeech, 20000); }
+
+// 持续状态系统
+let activeStatus = null;
+function updateStatusDisplay() {
+    const div = document.getElementById("activeStatusDisplay");
+    if(activeStatus && activeStatus.duration > 0) {
+        div.style.display = "block";
+        div.innerHTML = `⚠️ ${activeStatus.effectDesc} (剩余${activeStatus.duration}天)`;
+    } else {
+        div.style.display = "none";
+        activeStatus = null;
+    }
+}
+function addStatus(type, duration, effectDesc) {
+    activeStatus = { type, duration, effectDesc };
+    updateStatusDisplay();
+    addLog(`📌 状态【${effectDesc}】将持续${duration}天`);
+}
+
+// 游戏核心数据
+const gameData = {
+    grade: 1, day: 1, dayMax: 20, energy: 60, maxEnergyBase: 60, pressure: 5, physical: 5, emotion: 5, friend: 3, artValue: 0,
+    chinese: 0, math: 0, english: 0, phys: 0, chem: 0, bio: 0, politic: 0, history: 0, geo: 0, tech: 0,
+    gameOver: false, talent: [], relaxUsedToday: 0, maxRelaxPerDay: 1, extraRelaxToday: false, doubleBoost: false, classBuff: false,
+    classBuffSub: "", contestLineChoosed: false, artLineChoosed: false, sportLineChoosed: false, weight: {}, selectedSub: [], contestOpen: false,
+    contestTarget: "math", artRoute: false, sportRoute: false, achievementsUnlocked: [], allSubList: ["chinese","math","english","phys","chem","bio","politic","history","geo","tech"],
+    hasPopContest: false, hasPopArt: false, hasPopSport: false, pendingPlan: [], unlockedTrainings: [],
+    totalStudyCount: 0,
+    mainSubjects: ["chinese","math","english"],
+    electiveSubs: ["phys","chem","bio","politic","history","geo","tech"],
+    contestEventTriggered: false, artEventTriggered: false, sportEventTriggered: false,
+    totalSocialCount: 0   // 累计社交次数，影响艺术/体育事件概率
+};
+
+const ALL_TRAININGS = [
+    "trainChinese", "trainMath", "trainEnglish",
+    "trainPhys", "trainChem", "trainBio",
+    "trainPolitic", "trainHistory", "trainGeo", "trainTech"
+];
+
+const talentPool = [
+    { name: "解题能手", type: "studyUp" }, { name: "钢铁意志", type: "pressDown" },
+    { name: "运动健将", type: "phyUp" }, { name: "人脉大师", type: "eqUp" },
+    { name: "夜猫子", type: "energyUp" }, { name: "佛系学习", type: "energySave" }
+];
+
+// 基础数值已大幅降低，后续乘以年级系数
+const actionEffects = {
+    study: { energy: -10, pressure: 2, type: "fullStudy", mainBonus: 0.5, electiveBonus: 0.3, desc: "刷题" },
+    read: { energy: -10, pressure: 2, chinese: 1.5, desc: "精读" },
+    sport: { energy: -12, pressure: -5, physical: 1.5, desc: "锻炼" },
+    relax: { energy: 10, pressure: -10, desc: "放松" },
+    social: { energy: -8, pressure: -3, emotion: 1, friend: 1, desc: "社交" },
+    night: { energy: -15, pressure: 6, allBase: 0.8, desc: "熬夜" },
+    contestTrain: { energy: -22, pressure: 10, contestBonus: 2.5, desc: "竞赛特训" },
+    trainChinese: { energy: -15, chinese: 2, pressure: 3, desc: "语文特训" },
+    trainMath: { energy: -15, math: 2, pressure: 3, desc: "数学特训" },
+    trainEnglish: { energy: -15, english: 2, pressure: 3, desc: "英语特训" },
+    trainPhys: { energy: -15, phys: 2, pressure: 3, desc: "物理特训" },
+    trainChem: { energy: -15, chem: 2, pressure: 3, desc: "化学特训" },
+    trainBio: { energy: -15, bio: 2, pressure: 3, desc: "生物特训" },
+    trainPolitic: { energy: -15, politic: 2, pressure: 3, desc: "政治特训" },
+    trainHistory: { energy: -15, history: 2, pressure: 3, desc: "历史特训" },
+    trainGeo: { energy: -15, geo: 2, pressure: 3, desc: "地理特训" },
+    trainTech: { energy: -15, tech: 2, pressure: 3, desc: "技术特训" },
+    majorFocus: { energy: -18, pressure: 5, allBase: 1, desc: "主修专攻", isMajor: true }
+};
+
+const eventPool = {
+    normal: [
+        { text: "平静的一天，默默刷题", choices: [{ txt: "继续努力", e: {} }] },
+        { text: "自习课很安静，效率不错", choices: [{ txt: "专注", e: { all: 0.8 } }] },
+        { text: "课间和同学讨论题目", choices: [{ txt: "参与讨论", e: { randomSub: 0.8, friend: 1 } }] },
+        { text: "图书馆学习氛围很好", choices: [{ txt: "静心学习", e: { all: 0.8, pressure: -2 } }] }
+    ],
+    goodBase: [
+        { text: "📚 校优秀学生分享会", choices: [{ txt: "认真听讲", e: { all: 0.8 } }] },
+        { text: "🔬 物理实验课表现优异，发现物理特训！", choices: [{ txt: "太棒了", e: { phys: 0.8 }, unlock: "trainPhys" }] },
+        { text: "🧪 化学竞赛讲座，发现化学特训！", choices: [{ txt: "去听讲", e: { chem: 0.8 }, unlock: "trainChem" }] },
+        { text: "🌿 生物课外实践，发现生物特训！", choices: [{ txt: "参加", e: { bio: 0.8 }, unlock: "trainBio" }] },
+        { text: "📜 历史博物馆参观，发现历史特训！", choices: [{ txt: "参观", e: { history: 0.8 }, unlock: "trainHistory" }] },
+        { text: "🌍 地理考察活动，发现地理特训！", choices: [{ txt: "参加", e: { geo: 0.8 }, unlock: "trainGeo" }] },
+        { text: "⚙️ 技术社团活动，发现技术特训！", choices: [{ txt: "加入", e: { tech: 0.8 }, unlock: "trainTech" }] },
+        { text: "💪 体育老师表扬你！体魄+2", choices: [{ txt: "继续锻炼", e: { physical: 2 } }] },
+        { text: "🏆 参加校运会获奖！体魄+2，情商+1", choices: [{ txt: "太棒了", e: { physical: 2, emotion: 1 } }] },
+        { text: "📖 发现一本很好的参考书", choices: [{ txt: "认真研读", e: { randomSub: 0.8 } }] },
+        { text: "👨‍🏫 老师课后单独辅导", choices: [{ txt: "认真听讲", e: { all: 0.8, pressure: -2 } }] },
+        { text: "😊 心情特别好，今天可以多放松一次！", choices: [{ txt: "太棒了", e: { extraRelax: true } }] },
+        { text: "🤧 不小心感冒了，接下来2天精力-15！", choices: [{ txt: "好好休息", e: { status: { type:"cold", duration:2, effectDesc:"感冒：每天精力-15" } } }] },
+        { text: "😖 考试压力过大，失眠了！接下来2天精力-10，压力+8", choices: [{ txt: "调整心态", e: { status: { type:"insomnia", duration:2, effectDesc:"失眠：每天精力-10，压力+8" } } }] },
+        { text: "🎉 被老师表扬，士气高涨！接下来2天学习效率提升（全科+0.8）", choices: [{ txt: "继续努力", e: { status: { type:"motivated", duration:2, effectDesc:"斗志昂扬：每天全科+0.8" } } }] }
+    ],
+    bad: [
+        { text: "😭 模拟考失利", choices: [{ txt: "调整心态", e: { pressure: 6, all: -0.8 } }] },
+        { text: "🤧 感冒头晕", choices: [{ txt: "吃药休息", e: { status: { type:"cold", duration:2, effectDesc:"感冒：每天精力-12" } } }] },
+        { text: "💔 和同学闹矛盾", choices: [{ txt: "和解", e: { emotion: -2, friend: -2, pressure: 4 } }] },
+        { text: "😴 上课打瞌睡被批评", choices: [{ txt: "反省", e: { pressure: 3, all: -0.8 } }] },
+        { text: "📱 玩手机被没收", choices: [{ txt: "认真道歉", e: { pressure: 4, emotion: -1 } }] }
+    ]
+};
+
+function getFilteredGoodEvents() {
+    return eventPool.goodBase.filter(ev => {
+        if (ev.unlock && gameData.unlockedTrainings.includes(ev.unlock)) return false;
+        return true;
+    });
+}
+
+// 年级系数：高一0.6，高二1.0，高三1.4
+function getGradeMultiplier() {
+    if(gameData.grade === 1) return 0.6;
+    if(gameData.grade === 2) return 1.0;
+    return 1.4;
+}
+
+// 初始化权重
+function initWeights() {
+    for(let sub of gameData.mainSubjects) {
+        gameData.weight[sub] = +(Math.random() * 0.25 + 0.95).toFixed(2);
+    }
+    let electiveList = [...gameData.electiveSubs];
+    for(let i=electiveList.length-1; i>0; i--) {
+        let j = Math.floor(Math.random()*(i+1));
+        [electiveList[i], electiveList[j]] = [electiveList[j], electiveList[i]];
+    }
+    for(let i=0; i<2 && i<electiveList.length; i++) gameData.weight[electiveList[i]] = +(Math.random() * 0.2 + 0.9).toFixed(2);
+    for(let i=2; i<5 && i<electiveList.length; i++) gameData.weight[electiveList[i]] = +(Math.random() * 0.2 + 0.7).toFixed(2);
+    for(let i=5; i<electiveList.length; i++) gameData.weight[electiveList[i]] = +(Math.random() * 0.2 + 0.5).toFixed(2);
+}
+
+function initGame() {
+    gameData.allSubList.forEach(s => gameData[s] = 0);
+    gameData.artValue = 0;
+    gameData.physical = 5; gameData.emotion = 5; gameData.friend = 3;
+    gameData.energy = 60; gameData.maxEnergyBase = 60; gameData.pressure = 5;
+    updateMaxEnergy();
+    gameData.relaxUsedToday = 0; gameData.maxRelaxPerDay = 1; gameData.extraRelaxToday = false;
+    gameData.pendingPlan = []; gameData.unlockedTrainings = [];
+    gameData.hasPopContest = false; gameData.hasPopArt = false; gameData.hasPopSport = false;
+    gameData.contestOpen = false; gameData.artRoute = false; gameData.sportRoute = false;
+    gameData.selectedSub = []; gameData.day = 1; gameData.grade = 1;
+    gameData.contestEventTriggered = false; gameData.artEventTriggered = false; gameData.sportEventTriggered = false;
+    gameData.totalStudyCount = 0;
+    gameData.totalSocialCount = 0;
+    activeStatus = null;
+    initWeights();
+    randomStartTalent();
+    buildScoreUI(); buildDragSource(); buildActionButtons(); initDragDrop();
+    refreshUI(); updateGradeText(); refreshCharMood(); updateUnlockedDisplay(); updateSubjectBonusDisplay();
+    let weightMsg = "📊 科目学习效率：";
+    for(let sub of gameData.mainSubjects) weightMsg += `${getActionName(sub)} ${Math.round(gameData.weight[sub]*100)}% `;
+    weightMsg += " | 选考：";
+    for(let sub of gameData.electiveSubs) weightMsg += `${getActionName(sub)} ${Math.round(gameData.weight[sub]*100)}% `;
+    addLog(weightMsg);
+    addLog("🎉 重生高中！刷题累计40次可解锁全部特训，分数随年级递增，社交提升艺术/体育事件概率。");
+}
+
+function updateMaxEnergy() {
+    let bonus = Math.floor(gameData.physical / 15);
+    let maxEnergy = Math.min(100, gameData.maxEnergyBase + bonus * 5);
+    document.getElementById("maxEnergy").innerText = maxEnergy;
+    if(gameData.energy > maxEnergy) gameData.energy = maxEnergy;
+    return maxEnergy;
+}
+function updateDailyRecovery() { return 12 + Math.floor(gameData.physical / 15) * 2; }
+function getCurrentMaxEnergy() { return Math.min(100, gameData.maxEnergyBase + Math.floor(gameData.physical / 15) * 5); }
+function updateSubjectBonusDisplay() { /* 简略 */ }
+function buildScoreUI() {
+    let html = "", nameMap = { chinese:"语文", math:"数学", english:"英语", phys:"物理", chem:"化学", bio:"生物", politic:"政治", history:"历史", geo:"地理", tech:"技术" };
+    gameData.allSubList.forEach(s => { html += `<div class="score-item" id="s-${s}"><div class="score-title">📖${nameMap[s]}</div><div class="score-num" id="${s}">0</div></div>`; });
+    document.getElementById("scoreGrid").innerHTML = html;
+}
+function getActiveTrainings() {
+    const all = [
+        { type:"trainChinese", subject:"chinese", name:"语文特训", icon:"🇨🇳", effect:"-15精 +2语文" },
+        { type:"trainMath", subject:"math", name:"数学特训", icon:"➗", effect:"-15精 +2数学" },
+        { type:"trainEnglish", subject:"english", name:"英语特训", icon:"🇬🇧", effect:"-15精 +2英语" },
+        { type:"trainPhys", subject:"phys", name:"物理特训", icon:"⚛️", effect:"-15精 +2物理" },
+        { type:"trainChem", subject:"chem", name:"化学特训", icon:"🧪", effect:"-15精 +2化学" },
+        { type:"trainBio", subject:"bio", name:"生物特训", icon:"🌱", effect:"-15精 +2生物" },
+        { type:"trainPolitic", subject:"politic", name:"政治特训", icon:"📜", effect:"-15精 +2政治" },
+        { type:"trainHistory", subject:"history", name:"历史特训", icon:"📚", effect:"-15精 +2历史" },
+        { type:"trainGeo", subject:"geo", name:"地理特训", icon:"🌍", effect:"-15精 +2地理" },
+        { type:"trainTech", subject:"tech", name:"技术特训", icon:"💻", effect:"-15精 +2技术" }
+    ];
+    if(gameData.selectedSub.length === 0) return all;
+    return all.filter(t => gameData.selectedSub.includes(t.subject));
+}
+function buildDragSource() {
+    let items = [
+        { type:"study", icon:"📝", effect:"-10精 语数英+0~1 选考+0~1" }, { type:"read", icon:"📖", effect:"-10精 +1~2语文" },
+        { type:"sport", icon:"🏃", effect:"-12精 +1~2体魄" }, { type:"relax", icon:"🎮", effect:"+10精 -10压 (限1)" },
+        { type:"social", icon:"👫", effect:"-8精 +1情商 +1友情" }, { type:"night", icon:"🌙", effect:"-15精 +0~1主修" }
+    ];
+    if(gameData.contestOpen) items.push({ type:"contestTrain", icon:"🏆", effect:"-22精 +2~3竞赛" });
+    if(gameData.selectedSub.length > 0 && gameData.grade >= 2) items.push({ type:"majorFocus", icon:"🎯", effect:"-18精 +1主修 (专攻)" });
+    getActiveTrainings().forEach(t => {
+        let isUnlocked = gameData.unlockedTrainings.includes(t.type);
+        items.push({ type:t.type, icon:t.icon, effect:t.effect, locked:!isUnlocked, name:t.name });
+    });
+    let html = ""; items.forEach(it => {
+        let lockedClass = it.locked ? 'locked' : '';
+        html += `<div class="plan-item ${lockedClass}" draggable="${!it.locked}" data-type="${it.type}" style="${it.locked ? 'opacity:0.5;cursor:not-allowed;' : ''}">
+            ${it.icon}<small>${it.effect}</small>${it.locked ? '<span style="display:block;color:#ef4444;">🔒未解锁</span>' : ''}
+        </div>`;
+    });
+    document.getElementById("dragTable").innerHTML = html;
+    document.querySelectorAll(".plan-item").forEach(item => {
+        if (!item.classList.contains("locked")) item.ondragstart = e => { dragType = item.dataset.type; e.dataTransfer.setData("text/plain", dragType); };
+        else item.ondragstart = e => { e.preventDefault(); return false; };
+    });
+}
+function buildActionButtons() {
+    let btns = ["study","read","sport","relax","social","night"];
+    let btnHtml = "";
+    btns.forEach(t => { let name = { study:"刷题", read:"精读", sport:"锻炼", relax:"放松", social:"社交", night:"熬夜" }[t]; btnHtml += `<button class="action-btn" onclick="runImmediateAction('${t}')">${name}</button>`; });
+    if(gameData.selectedSub.length > 0 && gameData.grade >= 2) btnHtml += `<button class="action-btn" onclick="runImmediateAction('majorFocus')">主修专攻🎯</button>`;
+    getActiveTrainings().forEach(t => {
+        let isUnlocked = gameData.unlockedTrainings.includes(t.type);
+        btnHtml += `<button class="action-btn ${!isUnlocked ? 'locked' : ''}" onclick="runImmediateAction('${t.type}')" ${!isUnlocked ? 'disabled style="pointer-events:none;"' : ''}>${t.name}${!isUnlocked ? ' 🔒' : ''}</button>`;
+    });
+    document.getElementById("actionBtns").innerHTML = btnHtml;
+    updateBtnStatus();
+}
+function updateUnlockedDisplay() {
+    let display = document.getElementById("unlockedTrainings");
+    let activeTypes = getActiveTrainings().map(tr => tr.type);
+    let unlockedNames = gameData.unlockedTrainings.filter(t => activeTypes.includes(t)).map(t => getActionName(t));
+    display.innerText = unlockedNames.length ? unlockedNames.join(", ") : "无 (刷题40次全部解锁)";
+}
+function randomStartTalent() {
+    let count = Math.floor(Math.random() * 2) + 1, tempTalent = [...talentPool];
+    for (let i = 0; i < count; i++) { let idx = Math.floor(Math.random() * tempTalent.length); gameData.talent.push(tempTalent.splice(idx, 1)[0]); }
+    let html = ""; gameData.talent.forEach(t => { html += `<span style="background:#d9f0ff;display:inline-block;margin:3px;padding:3px 8px;border-radius:20px;">${t.name}</span>`; });
+    document.getElementById("talentList").innerHTML = html;
+    document.getElementById("talentShow").innerText = gameData.talent.map(t => t.name).join(" ");
+}
+let dragType = "";
+function initDragDrop() {
+    let slotsHtml = ""; for (let i = 0; i < 8; i++) slotsHtml += `<div class="plan-slot" data-index="${i}"><div class="slot-effect"></div></div>`;
+    document.getElementById("planTable").innerHTML = slotsHtml;
+    document.querySelectorAll(".plan-slot").forEach(slot => {
+        slot.ondragover = e => e.preventDefault();
+        slot.ondrop = e => { 
+            e.preventDefault(); if(gameData.gameOver) return; if(gameData.energy<=0){ addLog("精力不足无法安排课程"); return; } 
+            let type = e.dataTransfer.getData("text/plain");
+            if(type){ 
+                if(type.startsWith("train") && !gameData.unlockedTrainings.includes(type)){ addLog(`❌ ${getActionName(type)}尚未解锁！继续刷题累计40次可全部解锁。`); return; }
+                if(type === "majorFocus" && (gameData.grade < 2 || gameData.selectedSub.length === 0)){ addLog("❌ 主修专攻需要选科后高二才开放"); return; }
+                let idx=parseInt(slot.dataset.index); gameData.pendingPlan = gameData.pendingPlan.filter(p=>p.slotIndex!==idx); 
+                gameData.pendingPlan.push({type:type, slotIndex:idx}); updateSlotDisplay(); addLog(`📌 安排:${getActionName(type)}到第${idx+1}节`); 
+            } 
         };
-        let tileList = [];
-        const ROW = 28;
-        const COL = 45;
+        slot.onclick = () => { if(gameData.gameOver) return; let idx=parseInt(slot.dataset.index); let found=gameData.pendingPlan.find(p=>p.slotIndex===idx); if(found){ gameData.pendingPlan=gameData.pendingPlan.filter(p=>p.slotIndex!==idx); updateSlotDisplay(); addLog(`❌ 取消第${idx+1}节`); } };
+    });
+}
+function getActionName(type) { const map={ study:"刷题", read:"精读", sport:"锻炼", relax:"放松", social:"社交", night:"熬夜", contestTrain:"竞赛特训", majorFocus:"主修专攻", trainChinese:"语文特训", trainMath:"数学特训", trainEnglish:"英语特训", trainPhys:"物理特训", trainChem:"化学特训", trainBio:"生物特训", trainPolitic:"政治特训", trainHistory:"历史特训", trainGeo:"地理特训", trainTech:"技术特训" }; return map[type]||type; }
+function updateSlotDisplay() { let slots = document.querySelectorAll(".plan-slot"); slots.forEach((slot,idx) => { slot.classList.remove("filled"); slot.innerHTML='<div class="slot-effect"></div>'; let find=gameData.pendingPlan.find(p=>p.slotIndex===idx); if(find){ slot.classList.add("filled"); slot.innerHTML=`${getIcon(find.type)}<div class="slot-effect">${getEffectText(find.type)}</div>`; } }); }
+function getIcon(type) { const map={ study:"📝", read:"📖", sport:"🏃", relax:"🎮", social:"👫", night:"🌙", contestTrain:"🏆", majorFocus:"🎯", trainChinese:"🇨🇳", trainMath:"➗", trainEnglish:"🇬🇧", trainPhys:"⚛️", trainChem:"🧪", trainBio:"🌱", trainPolitic:"📜", trainHistory:"📚", trainGeo:"🌍", trainTech:"💻" }; return map[type]||"✅"; }
+function getEffectText(type) { let eff=actionEffects[type]; if(!eff) return ""; let parts=[]; if(eff.allBase) parts.push(`+${eff.allBase}主修`); if(eff.chinese) parts.push(`+${eff.chinese}语文`); if(eff.math) parts.push(`+${eff.math}数学`); if(eff.english) parts.push(`+${eff.english}英语`); if(eff.phys) parts.push(`+${eff.phys}物理`); if(eff.chem) parts.push(`+${eff.chem}化学`); if(eff.bio) parts.push(`+${eff.bio}生物`); if(eff.politic) parts.push(`+${eff.politic}政治`); if(eff.history) parts.push(`+${eff.history}历史`); if(eff.geo) parts.push(`+${eff.geo}地理`); if(eff.tech) parts.push(`+${eff.tech}技术`); if(eff.physical) parts.push(`+${eff.physical}体魄`); if(eff.emotion) parts.push(`+${eff.emotion}情商`); if(eff.friend) parts.push(`+${eff.friend}友情`); if(eff.contestBonus) parts.push(`+${eff.contestBonus}竞赛`); if(eff.energy>0) parts.push(`+${eff.energy}精`); else if(eff.energy) parts.push(`${eff.energy}精`); if(eff.pressure>0) parts.push(`+${eff.pressure}压`); else if(eff.pressure<0) parts.push(`${eff.pressure}压`); return parts.slice(0,2).join(" "); }
 
-        function initMap() {
-            const mapDom = document.getElementById('map');
-            mapDom.innerHTML = '';
-            tileList = [];
-            gameData.mapData = [];
+// 核心加分函数：乘以年级系数和权重，至少+1
+function addScoreWithBonus(subject, baseValue) {
+    let bonus = (gameData.selectedSub.includes(subject) && gameData.grade >= 2) ? 1.1 : 1.0;
+    let raw = baseValue * getGradeMultiplier() * bonus * (gameData.weight[subject] || 1);
+    let finalValue = Math.max(1, Math.floor(raw));
+    gameData[subject] = Math.min(100, gameData[subject] + finalValue);
+    return finalValue;
+}
+function addAllSubjects(baseValue) {
+    let multiplier = getGradeMultiplier();
+    for(let sub of gameData.allSubList) {
+        let raw = baseValue * multiplier * (gameData.weight[sub] || 1);
+        let finalVal = Math.max(1, Math.floor(raw));
+        gameData[sub] = Math.min(100, gameData[sub] + finalVal);
+    }
+    addLog(`✨ 全科+${baseValue} (年级系数${multiplier})`);
+}
 
-            for(let r = 0; r < ROW; r++){
-                gameData.mapData[r] = [];
-                for(let c = 0; c < COL; c++){
-                    const tile = document.createElement('div');
-                    tile.className = 'tile';
-                    tile.dataset.row = r;
-                    tile.dataset.col = c;
-                    tile.dataset.type = '';
-                    mapDom.appendChild(tile);
-                    tileList.push(tile);
-                    gameData.mapData[r][c] = '';
-
-                    tile.onclick = function(){
-                        buildTile(this);
-                    };
-                }
-            }
+function applyFullStudy(mainBonus, electiveBonus) {
+    gameData.totalStudyCount++; addLog(`📊 刷题总次数: ${gameData.totalStudyCount}/40`);
+    if(gameData.totalStudyCount >= 40 && gameData.unlockedTrainings.length < ALL_TRAININGS.length) {
+        let newUnlocked = ALL_TRAININGS.filter(t => !gameData.unlockedTrainings.includes(t));
+        gameData.unlockedTrainings.push(...newUnlocked);
+        addLog(`🎉🎉🎉 恭喜！刷题达到40次，你领悟了全部特训！`);
+        buildDragSource(); buildActionButtons(); updateUnlockedDisplay(); initDragDrop();
+    }
+    let multiplier = getGradeMultiplier();
+    for(let sub of gameData.mainSubjects) {
+        let raw = mainBonus * multiplier * (gameData.weight[sub] || 1);
+        let add = Math.max(1, Math.floor(raw));
+        gameData[sub] = Math.min(100, gameData[sub] + add);
+        addLog(`📖 ${getActionName(sub)}+${add}`);
+    }
+    for(let sub of gameData.electiveSubs) {
+        let isAdd = Math.random() < 0.5;
+        if(isAdd) {
+            let raw = electiveBonus * 2 * multiplier * (gameData.weight[sub] || 1);
+            let add = Math.max(1, Math.floor(raw));
+            gameData[sub] = Math.min(100, gameData[sub] + add);
+            addLog(`📚 ${getActionName(sub)}+${add}`);
         }
+    }
+}
 
-        const buildBtns = document.querySelectorAll('.build-btn');
-        buildBtns.forEach(btn => {
-            btn.onclick = function(){
-                buildBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                gameData.currentBuild = {
-                    type: this.dataset.type,
-                    cost: Number(this.dataset.cost)
-                };
-            };
+function runImmediateAction(type) {
+    if(gameData.gameOver) return;
+    if(gameData.energy <= 0) { addLog("精力不足，无法行动！"); return; }
+    if(type === "relax") {
+        let maxRelax = gameData.maxRelaxPerDay + (gameData.extraRelaxToday ? 1 : 0);
+        if(gameData.relaxUsedToday >= maxRelax) { addLog("今日放松已达上限"); return; }
+    }
+    if(type.startsWith("train") && !gameData.unlockedTrainings.includes(type)){ addLog(`❌ ${getActionName(type)}尚未解锁！继续刷题累计40次可全部解锁。`); return; }
+    if(type === "majorFocus" && (gameData.grade < 2 || gameData.selectedSub.length === 0)){ addLog("❌ 主修专攻需要选科后高二才开放"); return; }
+    let eff = actionEffects[type]; if(!eff) return;
+    let finalEnergy = (eff.energy||0) + (gameData.talent.some(t=>t.type==="energySave")?-2:0);
+    if(gameData.energy + finalEnergy < 0) { addLog("精力不足，无法执行此行动！"); return; }
+    gameData.energy = Math.max(0, gameData.energy + finalEnergy);
+    gameData.pressure = Math.min(100, Math.max(0, gameData.pressure + (eff.pressure||0)));
+    
+    if(type === "study") applyFullStudy(eff.mainBonus, eff.electiveBonus);
+    if(eff.allBase) {
+        let base = eff.allBase;
+        if(gameData.selectedSub.length === 0) gameData.selectedSub = ["chinese","math","english"];
+        gameData.selectedSub.forEach(s => {
+            let raw = base * getGradeMultiplier() * (gameData.weight[s]||1) * (gameData.grade>=2?1.1:1.0);
+            let finalAdd = Math.max(1, Math.floor(raw));
+            gameData[s] = Math.min(100, gameData[s] + finalAdd);
         });
+    }
+    if(eff.chinese) addScoreWithBonus("chinese", eff.chinese);
+    if(eff.math) addScoreWithBonus("math", eff.math);
+    if(eff.english) addScoreWithBonus("english", eff.english);
+    if(eff.phys) addScoreWithBonus("phys", eff.phys);
+    if(eff.chem) addScoreWithBonus("chem", eff.chem);
+    if(eff.bio) addScoreWithBonus("bio", eff.bio);
+    if(eff.politic) addScoreWithBonus("politic", eff.politic);
+    if(eff.history) addScoreWithBonus("history", eff.history);
+    if(eff.geo) addScoreWithBonus("geo", eff.geo);
+    if(eff.tech) addScoreWithBonus("tech", eff.tech);
+    if(eff.physical) gameData.physical = Math.min(100, gameData.physical + eff.physical);
+    if(eff.emotion) gameData.emotion = Math.min(100, gameData.emotion + eff.emotion);
+    if(eff.friend) gameData.friend = Math.min(100, gameData.friend + eff.friend);
+    if(type === "relax") gameData.relaxUsedToday++;
+    if(type === "social") gameData.totalSocialCount++;
+    if(eff.contestBonus && gameData.contestOpen) {
+        let raw = eff.contestBonus * getGradeMultiplier();
+        let add = Math.max(1, Math.floor(raw));
+        gameData[gameData.contestTarget] = Math.min(100, gameData[gameData.contestTarget] + add);
+        addLog(`🔥 竞赛特训！${getActionName(gameData.contestTarget)}+${add}`);
+    }
+    limitValueSafe(); if(type==="social"||type==="relax") refreshCharMood();
+    refreshUI(); updateBtnStatus(); addLog(`⚡ 执行:${eff.desc||type}`);
+}
 
-        function buildTile(tile) {
-            const build = gameData.currentBuild;
-            if(!build) return showMsg("请先选择建造项目！");
+function chooseContestLine(flag) { document.getElementById("contestModal").style.display="none"; if(flag) { gameData.contestLineChoosed=true; gameData.contestOpen=true; let best="math", max=gameData.math; ["phys","chem","bio"].forEach(s=>{if(gameData[s]>max){max=gameData[s]; best=s;}}); gameData.contestTarget=best; document.getElementById("contestTag").style.display="inline-block"; addLog(`🏆 选择竞赛路线，${getActionName(best)}为主攻方向`); if(gameData.selectedSub.length && !gameData.selectedSub.includes(best)) addLog(`⚠️竞赛科目不在主修中，无选科加成`); } else addLog("放弃竞赛路线"); buildDragSource(); initDragDrop(); refreshUI(); }
+function chooseArtLine(flag) { document.getElementById("artModal").style.display="none"; if(flag) { gameData.artLineChoosed=true; gameData.artRoute=true; document.getElementById("artTag").style.display="inline-block"; addLog("🎨 选择艺术路线"); } else addLog("放弃艺术路线"); refreshUI(); }
+function chooseSportLine(flag) { document.getElementById("sportModal").style.display="none"; if(flag) { gameData.sportLineChoosed=true; gameData.sportRoute=true; document.getElementById("sportTag").style.display="inline-block"; addLog("🏅 选择体育路线"); } else addLog("放弃体育路线"); refreshUI(); }
 
-            const r = Number(tile.dataset.row);
-            const c = Number(tile.dataset.col);
-            const oldType = tile.dataset.type;
-
-            if(oldType) return showMsg("该位置已有建筑！");
-            if(gameData.money < build.cost) return showMsg("金币不足！", true);
-
-            gameData.money -= build.cost;
-            tile.classList.add(build.type);
-            tile.dataset.type = build.type;
-            gameData.mapData[r][c] = build.type;
-
-            calcCityEffect();
-            updateUI();
+function endDay() {
+    if(gameData.gameOver) return;
+    addLog("========== 结算今日课程 ==========");
+    for(let plan of gameData.pendingPlan){
+        let eff = actionEffects[plan.type];
+        if(!eff) continue;
+        if(plan.type.startsWith("train") && !gameData.unlockedTrainings.includes(plan.type)){ addLog(`⚠️ 跳过未解锁:${getActionName(plan.type)}`); continue; }
+        if(plan.type === "majorFocus" && (gameData.grade < 2 || gameData.selectedSub.length === 0)){ addLog(`⚠️ 跳过:专攻未开放`); continue; }
+        addLog(`📖 执行:${getActionName(plan.type)}`);
+        let talentCost = gameData.talent.some(t=>t.type==="energySave")?-2:0;
+        gameData.energy = Math.max(0, gameData.energy + (eff.energy||0) + talentCost);
+        gameData.pressure = Math.min(100, Math.max(0, gameData.pressure + (eff.pressure||0)));
+        if(plan.type === "study") applyFullStudy(eff.mainBonus, eff.electiveBonus);
+        if(eff.allBase) {
+            let base = eff.allBase;
+            if(gameData.selectedSub.length === 0) gameData.selectedSub = ["chinese","math","english"];
+            gameData.selectedSub.forEach(s => {
+                let raw = base * getGradeMultiplier() * (gameData.weight[s]||1) * (gameData.grade>=2?1.1:1.0);
+                let finalAdd = Math.max(1, Math.floor(raw));
+                gameData[s] = Math.min(100, gameData[s] + finalAdd);
+            });
         }
-
-        function calcCityEffect() {
-            let roadNum = 0, houseNum = 0, factoryNum = 0;
-            let parkNum = 0, powerNum = 0, waterNum = 0;
-
-            for(let r = 0; r < ROW; r++){
-                for(let c = 0; c < COL; c++){
-                    const t = gameData.mapData[r][c];
-                    switch(t){
-                        case 'road': roadNum++; break;
-                        case 'house': houseNum++; break;
-                        case 'factory': factoryNum++; break;
-                        case 'park': parkNum++; break;
-                        case 'power': powerNum++; break;
-                        case 'water': waterNum++; break;
-                    }
-                }
-            }
-
-            gameData.power = powerNum * 120;
-            gameData.water = waterNum * 120;
-
-            if(gameData.power > 0 && gameData.water > 0 && roadNum > 0){
-                gameData.population = houseNum * 12 + factoryNum * 6;
-            }else{
-                gameData.population = 0;
-            }
-
-            let baseHappy = 70;
-            baseHappy += parkNum * 4;
-            baseHappy -= factoryNum * 2;
-            gameData.happy = Math.max(10, Math.min(100, baseHappy));
-
-            gameData.tax = Math.floor(gameData.population * 0.8 + factoryNum * 15);
+        if(eff.chinese) addScoreWithBonus("chinese", eff.chinese);
+        if(eff.math) addScoreWithBonus("math", eff.math);
+        if(eff.english) addScoreWithBonus("english", eff.english);
+        if(eff.phys) addScoreWithBonus("phys", eff.phys);
+        if(eff.chem) addScoreWithBonus("chem", eff.chem);
+        if(eff.bio) addScoreWithBonus("bio", eff.bio);
+        if(eff.politic) addScoreWithBonus("politic", eff.politic);
+        if(eff.history) addScoreWithBonus("history", eff.history);
+        if(eff.geo) addScoreWithBonus("geo", eff.geo);
+        if(eff.tech) addScoreWithBonus("tech", eff.tech);
+        if(eff.physical) gameData.physical = Math.min(100, gameData.physical + eff.physical);
+        if(eff.emotion) gameData.emotion = Math.min(100, gameData.emotion + eff.emotion);
+        if(eff.friend) gameData.friend = Math.min(100, gameData.friend + eff.friend);
+        if(plan.type === "social") gameData.totalSocialCount++;
+        if(eff.contestBonus && gameData.contestOpen) {
+            let raw = eff.contestBonus * getGradeMultiplier();
+            let add = Math.max(1, Math.floor(raw));
+            gameData[gameData.contestTarget] = Math.min(100, gameData[gameData.contestTarget] + add);
         }
+    }
+    gameData.pendingPlan = []; updateSlotDisplay();
+    if(activeStatus && activeStatus.duration > 0) {
+        if(activeStatus.type === "cold") { gameData.energy = Math.max(0, gameData.energy - 15); addLog("🤧 感冒影响，精力-15"); }
+        else if(activeStatus.type === "insomnia") { gameData.energy = Math.max(0, gameData.energy - 10); gameData.pressure = Math.min(100, gameData.pressure+8); addLog("😖 失眠影响，精力-10，压力+8"); }
+        else if(activeStatus.type === "motivated") { addAllSubjects(0.8); addLog("🎉 斗志昂扬，全科+0.8"); }
+        activeStatus.duration--;
+        if(activeStatus.duration <= 0) { addLog(`✅ 状态【${activeStatus.effectDesc}】已结束`); activeStatus = null; }
+        updateStatusDisplay();
+    }
+    let recover = updateDailyRecovery() + (gameData.talent.some(t=>t.type==="energyUp")?4:0);
+    let maxEnergy = getCurrentMaxEnergy();
+    gameData.energy = Math.min(maxEnergy, gameData.energy + recover);
+    gameData.pressure = Math.max(0, gameData.pressure - 4);
+    gameData.relaxUsedToday = 0; gameData.extraRelaxToday = false; gameData.doubleBoost = false; document.getElementById("buffTag").style.display = "none";
+    addLog(`🌙 休息恢复+${recover}精力，压力-4，精力上限${maxEnergy}`);
+    gameData.day++; addLog(`📅 第 ${gameData.day} 天`);
+    
+    // 随机事件：路线事件优先，然后是普通事件；艺术/体育事件概率随社交次数提升
+    let rnd = Math.random(), evt = null;
+    if(!gameData.contestLineChoosed && !gameData.contestEventTriggered && Math.max(gameData.math,gameData.phys,gameData.chem,gameData.bio)>=80 && rnd<0.15) {
+        evt = { text:"🏆 学校选拔竞赛选手！你的理科成绩优异，是否参加选拔？", choices:[{txt:"参加",e:{unlockContest:true}},{txt:"放弃",e:{}}] }; gameData.contestEventTriggered=true;
+    } else if(!gameData.artLineChoosed && !gameData.artEventTriggered && gameData.artValue>=30 && rnd<0.15) {
+        evt = { text:"🎨 艺术节获奖，被推荐参加艺术特长生选拔！", choices:[{txt:"接受推荐",e:{unlockArt:true}},{txt:"婉拒",e:{}}] }; gameData.artEventTriggered=true;
+    } else if(!gameData.sportLineChoosed && !gameData.sportEventTriggered && gameData.physical>=80 && rnd<0.15) {
+        evt = { text:"🏅 校运会破纪录，体育特招机会！是否接受体育特长生选拔？", choices:[{txt:"接受",e:{unlockSport:true}},{txt:"拒绝",e:{}}] }; gameData.sportEventTriggered=true;
+    } else {
+        let goodEvents = getFilteredGoodEvents();
+        if(rnd<0.45) evt = eventPool.normal[Math.floor(Math.random()*eventPool.normal.length)];
+        else if(rnd<0.8) evt = goodEvents[Math.floor(Math.random()*goodEvents.length)];
+        else evt = eventPool.bad[Math.floor(Math.random()*eventPool.bad.length)];
+    }
+    if(evt) popEventChoice(evt);
+    
+    // 艺术/体育事件概率：基础12%，每点社交次数增加0.5%，最高40%
+    let artProb = Math.min(0.4, 0.12 + gameData.totalSocialCount * 0.005);
+    let sportProb = Math.min(0.4, 0.12 + gameData.totalSocialCount * 0.005);
+    if(Math.random() < artProb && !gameData.gameOver) triggerArtEvent();
+    if(Math.random() < sportProb && !gameData.gameOver) triggerSportEvent();
+    
+    if(gameData.grade===1 && gameData.day>gameData.dayMax){ addLog("🎓 高一学年结束！请进行选科"); showSubjectSelect(); return; }
+    if(gameData.day>gameData.dayMax){ gameData.grade++; gameData.day=1; addLog(`🎒 升入${gameData.grade===2?"高二":"高三"}`); updateGradeText(); buildDragSource(); buildActionButtons(); initDragDrop(); if(gameData.grade===3){ addLog("🏁 高三学年结束，高考！"); performGaokao(); return; } }
+    updateMaxEnergy(); limitValueSafe(); refreshUI(); updateBtnStatus(); refreshCharMood(); addLog("========== 结算完成 ==========");
+}
 
-        setInterval(() => {
-            if(gameData.population > 0){
-                gameData.money += gameData.tax;
-                showMsg(`税收结算：+${gameData.tax} 金币`);
-            }
-            updateUI();
-        }, 10000);
-
-        setInterval(() => {
-            const random = Math.random();
-            if(random < 0.25){
-                const idx = Math.floor(Math.random() * tileList.length);
-                const target = tileList[idx];
-                const r = Number(target.dataset.row);
-                const c = Number(target.dataset.col);
-                const type = target.dataset.type;
-
-                if(type && type !== 'road'){
-                    target.classList.add('disaster');
-                    showMsg("⚠️ 突发灾害，建筑受损！", true);
-                    setTimeout(() => {
-                        target.className = 'tile';
-                        target.dataset.type = '';
-                        gameData.mapData[r][c] = '';
-                        calcCityEffect();
-                        updateUI();
-                    }, 1200);
-                }
-            }
-        }, 1800000);
-
-        function updateUI() {
-            document.getElementById('money').innerText = gameData.money;
-            document.getElementById('pop').innerText = gameData.population;
-            document.getElementById('power').innerText = gameData.power;
-            document.getElementById('water').innerText = gameData.water;
-            document.getElementById('happy').innerText = gameData.happy;
-            document.getElementById('tax').innerText = gameData.tax;
-
-            const happyBar = document.getElementById('happyBar');
-            if(gameData.happy < 40){
-                happyBar.className = 'status-item danger';
-            }else{
-                happyBar.className = 'status-item happy';
-            }
+function performGaokao() {
+    if(gameData.selectedSub.length===0) gameData.selectedSub=["chinese","math","english"];
+    let mainAvg = gameData.selectedSub.reduce((a,s)=>a+gameData[s],0)/gameData.selectedSub.length;
+    let passed=false, resultMsg="";
+    if(gameData.contestOpen && gameData.contestLineChoosed){ let cs = gameData[gameData.contestTarget]; if(cs>=88){ passed=true; resultMsg=`🏆 竞赛保送！${getActionName(gameData.contestTarget)} ${cs}分，圆梦浙大！`; } else resultMsg=`竞赛科目${getActionName(gameData.contestTarget)}仅${cs}分，需≥88分。`; }
+    else if(gameData.artRoute){ if(gameData.artValue>=82 && mainAvg>=82){ passed=true; resultMsg=`🎨 艺术综合达标！文化均分${mainAvg.toFixed(1)}，艺术值${gameData.artValue}，被浙大录取！`; } else resultMsg=`艺术值${gameData.artValue}，文化均分${mainAvg.toFixed(1)}，需双≥82分。`; }
+    else if(gameData.sportRoute){ if(gameData.physical>=90 && mainAvg>=80){ passed=true; resultMsg=`🏅 体育特长达标！体魄${gameData.physical}，文化均分${mainAvg.toFixed(1)}，被浙大录取！`; } else resultMsg=`体魄${gameData.physical}，文化均分${mainAvg.toFixed(1)}，需体魄≥90且文化≥80。`; }
+    else { let all88 = gameData.selectedSub.every(s=>gameData[s]>=88); if(all88 && mainAvg>=90){ passed=true; resultMsg=`✨ 文化课优秀！均分${mainAvg.toFixed(1)}，全部≥88分，考上浙江大学！`; } else resultMsg=`主修均分${mainAvg.toFixed(1)}，有科目未达88分，高考失利。`; }
+    if(!passed) resultMsg+=" 请重新开局再战！";
+    gameData.gameOver=true; document.getElementById("endContent").innerHTML=resultMsg+(passed?"<br>🎉 恭喜圆梦浙江大学！":"<br>😭 点击重开"); document.getElementById("endModal").style.display="flex";
+}
+function popEventChoice(evt) { document.getElementById("eventText").innerHTML=evt.text; let btnHtml=""; evt.choices.forEach((c,i)=>{ btnHtml+=`<button class="choice-btn" onclick="handleEventChoice(${i})">${c.txt}</button>`; }); document.getElementById("choiceBox").innerHTML=btnHtml; window._tempEvent=evt; }
+function handleEventChoice(idx) {
+    let evt = window._tempEvent, choice = evt.choices[idx], eff = choice.e;
+    if(eff.all) addAllSubjects(eff.all);
+    if(eff.math) addScoreWithBonus("math", eff.math);
+    if(eff.english) addScoreWithBonus("english", eff.english);
+    if(eff.chinese) addScoreWithBonus("chinese", eff.chinese);
+    if(eff.phys) addScoreWithBonus("phys", eff.phys);
+    if(eff.chem) addScoreWithBonus("chem", eff.chem);
+    if(eff.bio) addScoreWithBonus("bio", eff.bio);
+    if(eff.politic) addScoreWithBonus("politic", eff.politic);
+    if(eff.history) addScoreWithBonus("history", eff.history);
+    if(eff.geo) addScoreWithBonus("geo", eff.geo);
+    if(eff.tech) addScoreWithBonus("tech", eff.tech);
+    if(eff.art){ gameData.artValue = Math.min(100, gameData.artValue + eff.art); addLog(`🎨 艺术值+${eff.art}`); }
+    if(eff.emotion) gameData.emotion = Math.min(100, gameData.emotion + eff.emotion);
+    if(eff.friend) gameData.friend = Math.min(100, gameData.friend + eff.friend);
+    if(eff.pressure) gameData.pressure = Math.min(100, Math.max(0, gameData.pressure + eff.pressure));
+    if(eff.energy) gameData.energy = Math.min(getCurrentMaxEnergy(), Math.max(0, gameData.energy + eff.energy));
+    if(eff.physical) gameData.physical = Math.min(100, gameData.physical + eff.physical);
+    if(eff.randomSub) { let candidates = gameData.selectedSub.length ? gameData.selectedSub : ["chinese","math","english"]; let rSub = candidates[Math.floor(Math.random()*candidates.length)]; addScoreWithBonus(rSub, eff.randomSub); addLog(`📚 ${getActionName(rSub)}+${eff.randomSub}`); }
+    if(eff.extraRelax) { gameData.extraRelaxToday = true; addLog(`✨ 心情特别好，今天可以额外放松一次！`); }
+    if(eff.status) addStatus(eff.status.type, eff.status.duration, eff.status.effectDesc);
+    if(eff.unlockContest) document.getElementById("contestModal").style.display="flex";
+    if(eff.unlockArt) document.getElementById("artModal").style.display="flex";
+    if(eff.unlockSport) document.getElementById("sportModal").style.display="flex";
+    if(choice.unlock && !gameData.unlockedTrainings.includes(choice.unlock)){ gameData.unlockedTrainings.push(choice.unlock); addLog(`🎉 解锁【${getActionName(choice.unlock)}】！`); buildDragSource(); buildActionButtons(); updateUnlockedDisplay(); initDragDrop(); }
+    document.getElementById("choiceBox").innerHTML = "";
+    limitValueSafe(); refreshUI(); updateBtnStatus(); refreshCharMood();
+}
+function triggerArtEvent() { document.getElementById("artEventModal").style.display="flex"; }
+function respondArtEvent(participate) { document.getElementById("artEventModal").style.display="none"; if(participate) { if(gameData.energy<4){ addLog("精力不足"); return; } gameData.energy-=4; gameData.artValue=Math.min(100,gameData.artValue+2); gameData.emotion=Math.min(100,gameData.emotion+1); addLog("🎭 参加艺术节，艺术+2，情商+1"); } else addLog("🎭 没有参加艺术节"); refreshUI(); }
+function triggerSportEvent() { document.getElementById("sportEventModal").style.display="flex"; }
+function respondSportEvent(participate) { document.getElementById("sportEventModal").style.display="none"; if(participate) { if(gameData.energy<6){ addLog("精力不足"); return; } gameData.energy-=6; gameData.physical=Math.min(100,gameData.physical+3); gameData.friend=Math.min(100,gameData.friend+1); addLog("🏃 参加运动会，体魄+3，友情+1"); updateMaxEnergy(); } else addLog("🏃 没有参加运动会"); refreshUI(); }
+function limitValueSafe() { let maxEnergy=getCurrentMaxEnergy(); gameData.energy=Math.min(maxEnergy,Math.max(0,gameData.energy)); gameData.pressure=Math.min(100,Math.max(0,gameData.pressure)); gameData.physical=Math.min(100,Math.max(0,gameData.physical)); gameData.emotion=Math.min(100,Math.max(0,gameData.emotion)); gameData.friend=Math.min(100,Math.max(0,gameData.friend)); gameData.artValue=Math.min(100,Math.max(0,gameData.artValue)); gameData.allSubList.forEach(s=>gameData[s]=Math.min(100,Math.max(0,gameData[s]))); if(gameData.pressure>=90 && gameData.selectedSub.length>0){ gameData.selectedSub.forEach(s=>gameData[s]=Math.max(0,gameData[s]-1)); gameData.pressure=80; addLog("⚠️ 压力爆炸，主修-1"); } }
+function updateBtnStatus() {
+    let energyZero = gameData.energy <= 0;
+    document.querySelectorAll(".action-btn").forEach(btn => {
+        if(energyZero) { btn.disabled = true; return; }
+        if(btn.innerText.includes("放松")) {
+            let maxRelax = gameData.maxRelaxPerDay + (gameData.extraRelaxToday ? 1 : 0);
+            if(gameData.relaxUsedToday >= maxRelax) btn.disabled = true;
+            else btn.disabled = false;
+        } else {
+            btn.disabled = false;
         }
-
-        function showMsg(text, isWarn = false) {
-            const msg = document.getElementById('msg');
-            msg.innerText = text;
-            msg.style.opacity = 1;
-            if(isWarn) msg.style.background = 'rgba(220,38,38,0.9)';
-            else msg.style.background = 'rgba(0,0,0,0.85)';
-
-            setTimeout(() => {
-                msg.style.opacity = 0;
-            }, 1800);
-        }
-
-        function saveGame() {
-            localStorage.setItem('citySave', JSON.stringify(gameData));
-            showMsg("✅ 城市存档成功！");
-        }
-
-        function loadGame() {
-            const save = localStorage.getItem('citySave');
-            if(!save) return showMsg("暂无存档记录！", true);
-
-            const oldData = JSON.parse(save);
-            Object.assign(gameData, oldData);
-
-            for(let r = 0; r < ROW; r++){
-                for(let c = 0; c < COL; c++){
-                    const idx = r * COL + c;
-                    const t = gameData.mapData[r][c];
-                    tileList[idx].className = 'tile';
-                    tileList[idx].dataset.type = t;
-                    if(t) tileList[idx].classList.add(t);
-                }
-            }
-            updateUI();
-            showMsg("✅ 读取存档成功！");
-        }
-
-        function resetGame() {
-            if(!confirm("确定要清空整个城市，重新开始吗？")) return;
-            gameData.money = 1500;
-            gameData.population = 0;
-            gameData.power = 0;
-            gameData.water = 0;
-            gameData.happy = 80;
-            gameData.tax = 0;
-            gameData.currentBuild = null;
-            initMap();
-            updateUI();
-            showMsg("🔄 城市已重置！");
-        }
-
-        window.onload = function() {
-            initMap();
-            updateUI();
+    });
+}
+function refreshUI(){
+    let gName = gameData.grade===1?"高一":(gameData.grade===2?"高二":"高三");
+    document.getElementById("stageText").innerHTML = `${gName} · 第${gameData.day}/${gameData.dayMax}天`;
+    let maxEnergy = getCurrentMaxEnergy();
+    document.getElementById("maxEnergy").innerText = maxEnergy;
+    document.getElementById("energy").innerText = Math.round(gameData.energy);
+    document.getElementById("pressure").innerText = Math.round(gameData.pressure);
+    document.getElementById("physical").innerText = Math.round(gameData.physical);
+    document.getElementById("emotion").innerText = Math.round(gameData.emotion);
+    document.getElementById("friend").innerText = Math.round(gameData.friend);
+    document.getElementById("artValue").innerText = Math.round(gameData.artValue);
+    document.getElementById("energyBar").style.width = `${(gameData.energy/maxEnergy)*100}%`;
+    document.getElementById("pressureBar").style.width = `${gameData.pressure}%`;
+    document.getElementById("physicalBar").style.width = `${gameData.physical}%`;
+    document.getElementById("emotionBar").style.width = `${gameData.emotion}%`;
+    gameData.allSubList.forEach(sub => { let dom = document.getElementById(sub); if(dom) dom.innerText = Math.round(gameData[sub]); });
+    updateBtnStatus();
+}
+function updateGradeText(){ let d=document.getElementById("gradeDesc"); if(gameData.grade===1) d.innerText="高一 · 从零开始"; else if(gameData.grade===2) d.innerText=gameData.selectedSub.length?`高二 · ${gameData.selectedSub.slice(0,6).map(s=>({chinese:"语文",math:"数学",english:"英语",phys:"物理",chem:"化学",bio:"生物",politic:"政治",history:"历史",geo:"地理",tech:"技术"}[s])).join(",")}`:"高二 · 未选科"; else d.innerText=gameData.contestOpen?"高三 · 竞赛冲刺":(gameData.artRoute?"高三 · 艺术集训":(gameData.sportRoute?"高三 · 体育特长":"高三 · 高考冲刺")); }
+function addLog(txt){ let log=document.getElementById("logBox"); log.innerHTML+=`<p>📌 ${txt}</p>`; log.scrollTop=log.scrollHeight; }
+function showSubjectSelect() {
+    let html="", subs=["chinese","math","english","phys","chem","bio","politic","history","geo","tech"];
+    let nameMap={chinese:"语文",math:"数学",english:"英语",phys:"物理",chem:"化学",bio:"生物",politic:"政治",history:"历史",geo:"地理",tech:"技术"};
+    subs.forEach(s=>{html+=`<div class="sub-check" data-sub="${s}">${nameMap[s]}</div>`;});
+    document.getElementById("subGrid").innerHTML=html;
+    gameData.selectedSub=["chinese","math","english"];
+    document.querySelectorAll(".sub-check").forEach(el=>{
+        let sub=el.dataset.sub;
+        if(sub==="chinese"||sub==="math"||sub==="english") el.classList.add("active");
+        el.onclick=()=>{
+            if(sub==="chinese"||sub==="math"||sub==="english"){ alert("语数英是必选科目"); return; }
+            if(el.classList.contains("active")){ el.classList.remove("active"); gameData.selectedSub=gameData.selectedSub.filter(s=>s!==sub); }
+            else{ if(gameData.selectedSub.length>=6){ alert("最多选6门"); return; } el.classList.add("active"); gameData.selectedSub.push(sub); }
+            document.getElementById("selectHint").innerHTML=`已选 ${gameData.selectedSub.length}/6 (语数英固定)`;
         };
-    </script>
+    });
+    document.getElementById("selectSubModal").style.display="flex";
+}
+function confirmSelectSub() {
+    if(gameData.selectedSub.length<3) gameData.selectedSub=["chinese","math","english"];
+    gameData.selectedSub=[...new Set(gameData.selectedSub)];
+    gameData.allSubList.forEach(sub=>{ let dom=document.getElementById(`s-${sub}`); if(!gameData.selectedSub.includes(sub)) dom?.classList.add("remove-sub"); });
+    let validTrainings=getActiveTrainings().map(t=>t.type);
+    gameData.unlockedTrainings=gameData.unlockedTrainings.filter(t=>validTrainings.includes(t));
+    document.getElementById("selectSubModal").style.display="none";
+    updateSubjectBonusDisplay();
+    if(gameData.contestOpen && !gameData.selectedSub.includes(gameData.contestTarget)) addLog(`⚠️竞赛科目${getActionName(gameData.contestTarget)}不在主修中，无加成`);
+    refreshUI(); addLog(`✅ 选科完成！主修获得10%学习加成！主修：${gameData.selectedSub.map(s=>({chinese:"语文",math:"数学",english:"英语",phys:"物理",chem:"化学",bio:"生物",politic:"政治",history:"历史",geo:"地理",tech:"技术"}[s])).join(", ")}`);
+    gameData.grade=2; gameData.day=1; updateGradeText(); buildDragSource(); buildActionButtons(); initDragDrop(); refreshUI();
+}
+document.getElementById("endDayBtn").onclick = () => endDay();
+window.showSubjectSelect=showSubjectSelect; window.confirmSelectSub=confirmSelectSub;
+window.chooseContestLine=chooseContestLine; window.chooseArtLine=chooseArtLine; window.chooseSportLine=chooseSportLine;
+window.runImmediateAction=runImmediateAction; window.handleEventChoice=handleEventChoice;
+window.respondArtEvent=respondArtEvent; window.respondSportEvent=respondSportEvent;
+initGame();
+</script>
 </body>
 </html>
